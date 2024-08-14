@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:AlzCapture.ViewModels"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:DataType="vm:ProcessListViewModel"
+             x:Class="AlzCapture.Views.ProcessListView">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:ProcessListViewModel />
+    </Design.DataContext>
+
+    <DataGrid ItemsSource="{Binding Processes}" SelectionMode="Single">
+        <DataGrid.Columns>
+            <DataGridTextColumn Header="PID"
+                                Binding="{Binding Id}" />
+            <DataGridTextColumn Header="进程名称"
+                                Binding="{Binding ProcessName}" />
+        </DataGrid.Columns>
+    </DataGrid>
+</UserControl>

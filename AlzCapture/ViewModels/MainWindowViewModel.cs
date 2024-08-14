@@ -1,8 +1,12 @@
-﻿namespace AlzCapture.ViewModels;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace AlzCapture.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-#pragma warning disable CA1822 // Mark members as static
-    public string Greeting => "Welcome to Avalonia!";
-#pragma warning restore CA1822 // Mark members as static
+    [ObservableProperty] private ViewModelBase _currentDataModel;
+    public MainWindowViewModel()
+    {
+        this.CurrentDataModel = new ProcessMonitorViewModel(null);
+    }
 }
