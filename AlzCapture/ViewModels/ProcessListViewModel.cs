@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using AlzCapture.Models.Messages;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace AlzCapture.ViewModels;
 
@@ -18,11 +20,12 @@ public partial class ProcessListViewModel : ViewModelBase
         Processes = new ObservableCollection<Process>(Process.GetProcesses()
             .Where(p => !string.IsNullOrWhiteSpace(p.ProcessName)).OrderBy(p => p.ProcessName));
     }
-    
-    private bool CanOpenNetMonitor() => CurrentSelectedProcess != null;
+
+    public bool CanOpenNetMonitor() => CurrentSelectedProcess != null;
 
     [RelayCommand(CanExecute = nameof(CanOpenNetMonitor))]
-    private void OpenNetMonitor()
+    public void OpenNetMonitor()
     {
+        WeakReferenceMessenger.Default.Send(new ProcessMonitorMessage(CurrentSelectedProcess.Id!));
     }
 }

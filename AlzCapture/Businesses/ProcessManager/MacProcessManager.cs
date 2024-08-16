@@ -1,12 +1,14 @@
-using System.Diagnostics;
+using System.Threading.Tasks;
 using AlzCapture.Businesses.Interfaces;
 
 namespace AlzCapture.Businesses.ProcessManager;
 
 public class MacProcessManager : IProcessManager
 {
-    public bool IsProcessRequest(int processId, string requestIp, string requestPort)
+    public async Task<bool> IsProcessRequestAsync(int processId, string requestIp, string requestPort)
     {
-        throw new System.NotImplementedException();
+        var command = $"lsof -Pan -p {processId} -i @{requestIp}:{requestPort}";
+        var (output, errors) = await CommandLineHelper.RunCommandAsync(command);
+        return !string.IsNullOrWhiteSpace(output);
     }
 }

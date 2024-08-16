@@ -1,11 +1,12 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
 using AlzCapture.Businesses.Interfaces;
 
 namespace AlzCapture.Businesses.ProcessManager;
 
 internal class LinuxProcessManager : IProcessManager
 {
-    public bool IsProcessRequest(int processId, string requestIp, string requestPort)
+    public Task<bool> IsProcessRequestAsync(int processId, string requestIp, string requestPort)
     {
         throw new System.NotImplementedException();
     }

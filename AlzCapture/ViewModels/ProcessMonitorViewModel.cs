@@ -17,7 +17,7 @@ namespace AlzCapture.ViewModels;
 
 public partial class ProcessMonitorViewModel : ViewModelBase
 {
-    private readonly Process _monitorProcess;
+    private readonly int _monitorProcessId;
 
     private readonly IProcessManager _processManager;
 
@@ -28,10 +28,10 @@ public partial class ProcessMonitorViewModel : ViewModelBase
     public ObservableCollection<HttpCommunicationPacket> HttpCommunicationPackets { get; set; }
 
     [ObservableProperty] private HttpCommunicationPacket _selectedPacket;
-    
-    public ProcessMonitorViewModel(Process monitorProcess)
+
+    public ProcessMonitorViewModel(int monitorProcessId)
     {
-        _monitorProcess = monitorProcess;
+        _monitorProcessId = monitorProcessId;
 
         _processManager = ProcessManagerFactory.Create();
 
@@ -42,7 +42,7 @@ public partial class ProcessMonitorViewModel : ViewModelBase
 
     public void StartCapture()
     {
-        var ver = SharpPcap.Pcap.SharpPcapVersion;
+        var ver = Pcap.SharpPcapVersion;
         Console.WriteLine("SharpPcap {0}", ver);
 
         var devices = CaptureDeviceList.Instance;
@@ -50,7 +50,6 @@ public partial class ProcessMonitorViewModel : ViewModelBase
         // If no devices were found print an error
         if (devices.Count < 1)
         {
-            Console.WriteLine("No devices were found on this machine");
             return;
         }
 
@@ -74,13 +73,12 @@ public partial class ProcessMonitorViewModel : ViewModelBase
                     Console.WriteLine(e.Message);
                 }
 
-                device.Filter = "host 192.168.110.68 ";
+                // device.Filter = "host 192.168.110.68 ";
 
                 // Start the capturing process
                 device.StartCapture();
 
                 _liveDevices.Add(device);
-                Console.WriteLine($"开始监听{device.Name}");
             }
             catch (Exception e)
             {
@@ -104,6 +102,7 @@ public partial class ProcessMonitorViewModel : ViewModelBase
     {
         var rawCapture = e.GetPacket();
         var packet = Packet.ParsePacket(rawCapture.LinkLayerType, rawCapture.Data);
+
         var ipPacket = packet.Extract<IPPacket>();
         if (ipPacket == null) return;
 
@@ -112,10 +111,18 @@ public partial class ProcessMonitorViewModel : ViewModelBase
 
         var payloadData = Encoding.ASCII.GetString(tcpPacket.PayloadData);
         if (payloadData.Length <= 0) return;
-
+        
         if (tcpPacket.IsHttpRequest())
         {
-            var requestPacket = (HttpRequestPacket)tcpPacket.ConverterToHttpPacket(ipPacket, true)!;
+            var isProcessRequest = _processManager.IsProcessRequestAsync(_monitorProcessId,
+                ipPacket.SourceAddress.ToString(), tcpPacket.SourcePort.ToString()).Result;
+
+            if (!isProcessRequest)
+            {
+                return;
+            }
+
+            var requestPacket = (HttpRequestPacket)tcpPacket.ConverterToHttpPacket(ipPacket, true, rawCapture.Timeval)!;
 
             var httpCommunicationPacket = new HttpCommunicationPacket
             {
@@ -142,8 +149,23 @@ public partial class ProcessMonitorViewModel : ViewModelBase
             var hasRequest = this._httpPacketKeyDictionary.TryGetValue(ackKey, out var communicationIndex);
             if (hasRequest)
             {
-                var responsePacket = (HttpResponsePacket)tcpPacket.ConverterToHttpPacket(ipPacket, false)!;
-                Console.WriteLine(responsePacket.StatusCode);
+                var responsePacket =
+                    (HttpResponsePacket)tcpPacket.ConverterToHttpPacket(ipPacket, false, rawCapture.Timeval)!;
+
+                var requestTimeval = this.HttpCommunicationPackets[communicationIndex].RequestPacket.CaptureTime;
+                var requestTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    .AddSeconds(requestTimeval.Seconds)
+                    .AddMilliseconds(requestTimeval.MicroSeconds / 1000.0);
+
+                var responseTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                    .AddSeconds(rawCapture.Timeval.Seconds)
+                    .AddMilliseconds(rawCapture.Timeval.MicroSeconds / 1000.0);
+
+                var communicationTime = (responseTime - requestTime).Milliseconds;
+                if (communicationTime == 0)
+                {
+                    communicationTime = 1;
+                }
 
                 Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -152,6 +174,8 @@ public partial class ProcessMonitorViewModel : ViewModelBase
                     this.HttpCommunicationPackets[communicationIndex].HttpStatusCode = responsePacket.StatusCode;
                     this.HttpCommunicationPackets[communicationIndex].ResponseDescription =
                         responsePacket.ResponseDescription;
+
+                    this.HttpCommunicationPackets[communicationIndex].ResponseTime = $"{communicationTime}ms";
                 });
             }
         }
