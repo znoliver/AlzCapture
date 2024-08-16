@@ -8,28 +8,34 @@ using AlzCapture.Businesses.Interfaces;
 using AlzCapture.Extensions;
 using AlzCapture.Models;
 using AlzCapture.Models.Http;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using PacketDotNet;
 using SharpPcap;
 
 namespace AlzCapture.ViewModels;
 
-public class ProcessMonitorViewModel : ViewModelBase
+public partial class ProcessMonitorViewModel : ViewModelBase
 {
     private readonly Process _monitorProcess;
 
     private readonly IProcessManager _processManager;
 
-    private readonly Dictionary<Tuple<string, ushort, string, ushort, uint>, int> _httpPacketKeyDictionary;
+    private readonly List<ILiveDevice> _liveDevices = new();
+
+    private readonly Dictionary<Tuple<string, ushort, string, ushort, uint, string>, int> _httpPacketKeyDictionary;
 
     public ObservableCollection<HttpCommunicationPacket> HttpCommunicationPackets { get; set; }
 
+    [ObservableProperty] private HttpCommunicationPacket _selectedPacket;
+    
     public ProcessMonitorViewModel(Process monitorProcess)
     {
         _monitorProcess = monitorProcess;
 
         _processManager = ProcessManagerFactory.Create();
 
-        _httpPacketKeyDictionary = new Dictionary<Tuple<string, ushort, string, ushort, uint>, int>();
+        _httpPacketKeyDictionary = new Dictionary<Tuple<string, ushort, string, ushort, uint, string>, int>();
 
         HttpCommunicationPackets = new ObservableCollection<HttpCommunicationPacket>();
     }
@@ -57,7 +63,6 @@ public class ProcessMonitorViewModel : ViewModelBase
                 // Register our handler function to the 'packet arrival' event
                 device.OnPacketArrival += DeviceOnOnPacketArrival;
 
-                // device.Filter = "ip dest 192.168.110.86";
                 // Open the device for capturing
                 try
                 {
@@ -74,12 +79,24 @@ public class ProcessMonitorViewModel : ViewModelBase
                 // Start the capturing process
                 device.StartCapture();
 
+                _liveDevices.Add(device);
                 Console.WriteLine($"开始监听{device.Name}");
             }
             catch (Exception e)
             {
+                device.Dispose();
                 Console.WriteLine($"监听失败：{device.Name},{e.Message}");
             }
+        }
+    }
+
+    public void StopCapture()
+    {
+        foreach (var device in _liveDevices)
+        {
+            device.StopCapture();
+            device.Close();
+            device.Dispose();
         }
     }
 
@@ -98,15 +115,20 @@ public class ProcessMonitorViewModel : ViewModelBase
 
         if (tcpPacket.IsHttpRequest())
         {
-            var key = Tuple.Create(ipPacket.SourceAddress.ToString(), tcpPacket.SourcePort,
-                ipPacket.DestinationAddress.ToString(), tcpPacket.DestinationPort, tcpPacket.SequenceNumber);
+            var requestPacket = (HttpRequestPacket)tcpPacket.ConverterToHttpPacket(ipPacket, true)!;
 
             var httpCommunicationPacket = new HttpCommunicationPacket
             {
-                RequestPacket = (HttpRequestPacket)tcpPacket.ConverterToHttpPacket(ipPacket, true)!
+                RequestPacket = requestPacket,
+                HttpMethod = requestPacket.RequestMethod,
+                RequestRouter = requestPacket.RequestRouter,
             };
 
-            this.HttpCommunicationPackets.Add(httpCommunicationPacket);
+            var key = Tuple.Create(ipPacket.SourceAddress.ToString(), tcpPacket.SourcePort,
+                ipPacket.DestinationAddress.ToString(), tcpPacket.DestinationPort,
+                tcpPacket.SequenceNumber + (uint)tcpPacket.PayloadData.Length, e.Device.Name);
+
+            Dispatcher.UIThread.InvokeAsync(() => this.HttpCommunicationPackets.Add(httpCommunicationPacket));
             this._httpPacketKeyDictionary.Add(key, this._httpPacketKeyDictionary.Count);
             return;
         }
@@ -114,12 +136,23 @@ public class ProcessMonitorViewModel : ViewModelBase
         if (tcpPacket.IsHttpResponse())
         {
             var ackKey = Tuple.Create(ipPacket.DestinationAddress.ToString(), tcpPacket.DestinationPort,
-                ipPacket.SourceAddress.ToString(), tcpPacket.SourcePort, tcpPacket.AcknowledgmentNumber - 1);
+                ipPacket.SourceAddress.ToString(), tcpPacket.SourcePort,
+                tcpPacket.AcknowledgmentNumber, e.Device.Name);
+
             var hasRequest = this._httpPacketKeyDictionary.TryGetValue(ackKey, out var communicationIndex);
             if (hasRequest)
             {
-                this.HttpCommunicationPackets[communicationIndex].ResponsePacket =
-                    (HttpResponsePacket)tcpPacket.ConverterToHttpPacket(ipPacket, false)!;
+                var responsePacket = (HttpResponsePacket)tcpPacket.ConverterToHttpPacket(ipPacket, false)!;
+                Console.WriteLine(responsePacket.StatusCode);
+
+                Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    this.HttpCommunicationPackets[communicationIndex].ResponsePacket = responsePacket;
+
+                    this.HttpCommunicationPackets[communicationIndex].HttpStatusCode = responsePacket.StatusCode;
+                    this.HttpCommunicationPackets[communicationIndex].ResponseDescription =
+                        responsePacket.ResponseDescription;
+                });
             }
         }
     }

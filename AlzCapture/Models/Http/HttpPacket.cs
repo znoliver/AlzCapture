@@ -17,6 +17,8 @@ public class HttpPacket
 
     public HttpContentType ContentType { get; private set; }
 
+    public int ContentLength { get; private set; }
+
     public IDictionary<string, string> Headers { get; set; } = new Dictionary<string, string>();
 
     public byte[] PayloadData { get; private set; } = [];
@@ -31,11 +33,12 @@ public class HttpPacket
         this.PayloadData = payloadData;
         var data = Encoding.ASCII.GetString(payloadData);
 
+        Console.WriteLine(data);
         var lines = data.Split(Environment.NewLine).ToList();
         var index = lines.FindIndex(string.IsNullOrWhiteSpace);
 
         var communicationLine = lines[0];
-        var headerLines = lines.GetRange(1, index - 2);
+        var headerLines = lines.GetRange(1, index - 1);
         var bodyLines = lines.GetRange(index + 1, lines.Count - index - 1);
 
         ParseCommunication(communicationLine);
@@ -49,10 +52,18 @@ public class HttpPacket
 
     private void ParseHttpPacketHeader(List<string> headerLines)
     {
-        foreach (var headerContent in headerLines.Select(headerLine => headerLine.Split(":"))
+        foreach (var headerContent in headerLines.Select(headerLine => headerLine.Split(":", 2))
                      .Where(headerContent => headerContent.Length == 2))
         {
-            this.Headers.Add(headerContent[0], headerContent[1]);
+            this.Headers.Add(headerContent[0], headerContent[1].TrimEnd());
+            if (headerContent[0] == "Content-Length")
+            {
+                this.ContentLength = int.Parse(headerContent[1].Trim());
+            }
+            else if (headerContent[0] == "Content-Type")
+            {
+                // this.ContentType = (HttpContentType)Enum.Parse(typeof(HttpContentType), headerContent[1].Trim());
+            }
         }
     }
 }

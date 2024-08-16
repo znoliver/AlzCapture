@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 
 namespace AlzCapture.Models.Http;
@@ -12,8 +13,9 @@ public class HttpRequestPacket : HttpPacket
 
     protected override void ParseCommunication(string communicationLine)
     {
-        var communicationInfos = communicationLine.Split("");
+        var communicationInfos = communicationLine.Split(" ");
 
+        Console.WriteLine(communicationInfos[0]);
         this.RequestMethod = HttpMethod.Parse(communicationInfos[0]);
         this.RequestRouter = communicationInfos[1];
         this.HttpVersion = communicationInfos[2];

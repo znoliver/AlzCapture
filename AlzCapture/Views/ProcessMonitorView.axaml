@@ -3,10 +3,61 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:AlzCapture.ViewModels"
+             xmlns:converters="using:AlzCapture.Converters"
+             xmlns:controls="using:AlzCapture.Controls"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:DataType="vm:ProcessMonitorViewModel"
              x:Class="AlzCapture.Views.ProcessMonitorView">
-    <Button Command="{Binding StartCapture}" Content="Click"></Button>
+    <UserControl.Resources>
+        <converters:EnumToIntConverter x:Key="EnumToIntConverter" />
+    </UserControl.Resources>
+
+    <SplitView PanePlacement="Right"
+               DisplayMode="Inline"
+               OpenPaneLength="500"
+               IsPaneOpen="True">
+        <!-- IsPaneOpen="{Binding SelectedPacket,Converter={x:Static ObjectConverters.IsNotNull}, Mode=OneWay}"> -->
+        <SplitView.Pane>
+            <controls:HttpPacketContentControl DataContext="{Binding SelectedPacket}" />
+        </SplitView.Pane>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal">
+                <Button Content="开始监控"
+                        Command="{Binding StartCapture}" />
+                <Button Content="停止监控"
+                        Command="{Binding StopCapture}" />
+            </StackPanel>
+
+            <DataGrid Grid.Row="1"
+                      IsReadOnly="True"
+                      SelectionMode="Single"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserSortColumns="False"
+                      HeadersVisibility="Column"
+                      ItemsSource="{Binding HttpCommunicationPackets}"
+                      SelectedItem="{Binding SelectedPacket}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="请求方法"
+                                        Binding="{Binding HttpMethod}" />
+                    <DataGridTextColumn Header="请求地址"
+                                        Binding="{Binding RequestRouter}" />
+                    <DataGridTextColumn Header="响应状态码"
+                                        Binding="{Binding HttpStatusCode,Converter={StaticResource EnumToIntConverter}}" />
+                    <DataGridTextColumn Header="响应描述"
+                                        Binding="{Binding ResponseDescription}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </SplitView>
+
 </UserControl>

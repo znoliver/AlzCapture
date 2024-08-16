@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:model="using:AlzCapture.Models"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:DataType="model:HttpCommunicationPacket"
+             x:Class="AlzCapture.Controls.HttpPacketContentControl">
+    <UserControl.Styles>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Margin"
+                    Value="2" />
+        </Style>
+    </UserControl.Styles>
+    <TabControl VerticalAlignment="Stretch">
+        <TabItem Header="请求头">
+            <ListBox ItemsSource="{Binding RequestPacket.Headers}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <SelectableTextBlock VerticalAlignment="Center"
+                                                 Text="{Binding Key,StringFormat='{}{0}:'}" />
+                            <SelectableTextBlock VerticalAlignment="Center"
+                                                 Text="{Binding Value}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </TabItem>
+        <TabItem Header="请求内容">
+            <TextBlock Text="{Binding RequestPacket.Body}" />
+        </TabItem>
+        <TabItem Header="响应头">
+            <ListBox ItemsSource="{Binding ResponsePacket.Headers}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <SelectableTextBlock VerticalAlignment="Center"
+                                                 Text="{Binding Key,StringFormat='{}{0}:'}" />
+                            <SelectableTextBlock VerticalAlignment="Center"
+                                                 Text="{Binding Value}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </TabItem>
+        <TabItem Header="响应内容">
+            <TextBlock Text="{Binding ResponsePacket.Body}" />
+        </TabItem>
+    </TabControl>
+</UserControl>
