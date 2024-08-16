@@ -55,6 +55,8 @@
                                         Binding="{Binding HttpStatusCode,Converter={StaticResource EnumToIntConverter}}" />
                     <DataGridTextColumn Header="响应描述"
                                         Binding="{Binding ResponseDescription}" />
+                    <DataGridTextColumn Header="响应时间"
+                                        Binding="{Binding ResponseTime}" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

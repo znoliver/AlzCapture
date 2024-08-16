@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using AlzCapture.Models.Http;
 using PacketDotNet;
+using SharpPcap;
 
 namespace AlzCapture.Extensions;
 
@@ -30,7 +31,8 @@ internal static class TcpPacketExtension
         return data.StartsWith("HTTP/");
     }
 
-    public static HttpPacket? ConverterToHttpPacket(this TcpPacket tcpPacket, IPPacket ipPacket, bool isRequest)
+    public static HttpPacket? ConverterToHttpPacket(this TcpPacket tcpPacket, IPPacket ipPacket, bool isRequest,
+        PosixTimeval timeval)
     {
         HttpPacket result = isRequest ? new HttpRequestPacket() : new HttpResponsePacket();
         var data = Encoding.ASCII.GetString(tcpPacket.PayloadData);
@@ -40,8 +42,9 @@ internal static class TcpPacketExtension
         result.SourcePort = tcpPacket.SourcePort.ToString();
         result.DestinationIp = ipPacket.DestinationAddress.ToString();
         result.DestinationPort = tcpPacket.DestinationPort.ToString();
+        result.CaptureTime = timeval;
         result.SetPayload(tcpPacket.PayloadData);
-        
+
         return result;
     }
 }

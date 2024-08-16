@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SharpPcap;
 
 namespace AlzCapture.Models.Http;
 
@@ -25,6 +26,8 @@ public class HttpPacket
 
     public string? Body { get; private set; }
 
+    public PosixTimeval CaptureTime { get; set; }
+
     /// <summary>
     /// Method to set the payload of the http packet and parse the data to the http packet properties
     /// </summary>
@@ -33,7 +36,6 @@ public class HttpPacket
         this.PayloadData = payloadData;
         var data = Encoding.ASCII.GetString(payloadData);
 
-        Console.WriteLine(data);
         var lines = data.Split(Environment.NewLine).ToList();
         var index = lines.FindIndex(string.IsNullOrWhiteSpace);
 
@@ -43,7 +45,7 @@ public class HttpPacket
 
         ParseCommunication(communicationLine);
         ParseHttpPacketHeader(headerLines);
-        this.Body = string.Join(Environment.NewLine, bodyLines);
+        this.Body = ParseBody(bodyLines);
     }
 
     protected virtual void ParseCommunication(string communicationLine)
@@ -55,7 +57,7 @@ public class HttpPacket
         foreach (var headerContent in headerLines.Select(headerLine => headerLine.Split(":", 2))
                      .Where(headerContent => headerContent.Length == 2))
         {
-            this.Headers.Add(headerContent[0], headerContent[1].TrimEnd());
+            this.Headers.Add(headerContent[0], headerContent[1].Trim());
             if (headerContent[0] == "Content-Length")
             {
                 this.ContentLength = int.Parse(headerContent[1].Trim());
@@ -66,4 +68,6 @@ public class HttpPacket
             }
         }
     }
+
+    protected virtual string ParseBody(List<string> bodyLines) => string.Join(Environment.NewLine, bodyLines);
 }

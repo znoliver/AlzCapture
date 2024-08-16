@@ -15,7 +15,6 @@ public class HttpRequestPacket : HttpPacket
     {
         var communicationInfos = communicationLine.Split(" ");
 
-        Console.WriteLine(communicationInfos[0]);
         this.RequestMethod = HttpMethod.Parse(communicationInfos[0]);
         this.RequestRouter = communicationInfos[1];
         this.HttpVersion = communicationInfos[2];
