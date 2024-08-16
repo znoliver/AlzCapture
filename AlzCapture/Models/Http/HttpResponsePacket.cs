@@ -10,8 +10,8 @@ public class HttpResponsePacket : HttpPacket
 
     protected override void ParseCommunication(string communicationLine)
     {
-        var communicationInfos = communicationLine.Split("");
+        var communicationInfos = communicationLine.Split(" ", 3);
         this.StatusCode = (HttpStatusCode)int.Parse(communicationInfos[1]);
-        this.ResponseDescription = communicationInfos[2];
+        this.ResponseDescription = communicationInfos[2].TrimEnd();
     }
 }
