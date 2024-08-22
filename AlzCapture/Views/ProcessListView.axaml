@@ -17,11 +17,16 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DataGrid ItemsSource="{Binding Processes}"
+        <TextBox Grid.Row="0"
+                 Watermark="输入进程名称进行搜索" />
+
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Processes}"
                   SelectionMode="Single"
                   SelectedItem="{Binding CurrentSelectedProcess}">
             <DataGrid.Columns>
