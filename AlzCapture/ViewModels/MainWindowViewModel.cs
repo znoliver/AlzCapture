@@ -6,13 +6,14 @@ namespace AlzCapture.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    [ObservableProperty] private ViewModelBase _currentDataModel;
+    [ObservableProperty] private ViewModelBase _currentContentDataModel;
+
 
     public MainWindowViewModel()
     {
-        this.CurrentDataModel = new ProcessListViewModel();
+        this._currentContentDataModel = new ProcessListViewModel();
 
         WeakReferenceMessenger.Default.Register<ProcessMonitorMessage>(this,
-            (r, m) => { this.CurrentDataModel = new ProcessMonitorViewModel(m.Value); });
+            (r, m) => { this.CurrentContentDataModel = new ProcessMonitorViewModel(m.Value); });
     }
 }

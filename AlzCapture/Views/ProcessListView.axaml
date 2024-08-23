@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
+             xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              xmlns:vm="using:AlzCapture.ViewModels"
              mc:Ignorable="d"
              d:DesignWidth="800"
@@ -15,20 +17,29 @@
     </Design.DataContext>
 
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Grid RowDefinitions="Auto,*"
+          Margin="20,0,20,20">
 
-        <TextBox Grid.Row="0"
-                 Watermark="输入进程名称进行搜索" />
+        <TextBox Grid.Row="0" 
+                 Margin="80,10"
+                 VerticalAlignment="Top"
+                 HorizontalAlignment="Stretch" Watermark="输入进程名称进行搜索"
+                 Text="{Binding SearchText}" />
 
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Processes}"
+        <DataGrid x:Name="ProcessList"
+                  Grid.Row="1"
+                  Margin="0,20"
+                  BorderThickness="2"
+                  BorderBrush="LightGray"
+                  ItemsSource="{Binding FilteredItems}"
                   SelectionMode="Single"
+                  GridLinesVisibility="Horizontal"
                   SelectedItem="{Binding CurrentSelectedProcess}">
+            <i:Interaction.Behaviors>
+                <ia:EventTriggerBehavior EventName="DoubleTapped" SourceObject="ProcessList">
+                    <ia:InvokeCommandAction Command="{Binding OpenNetMonitor}" />
+                </ia:EventTriggerBehavior>
+            </i:Interaction.Behaviors>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="PID"
                                     Binding="{Binding Id}" />
@@ -36,9 +47,5 @@
                                     Binding="{Binding ProcessName}" />
             </DataGrid.Columns>
         </DataGrid>
-
-        <Button Grid.Row="1"
-                Content="开始监控"
-                Command="{Binding OpenNetMonitor}" />
     </Grid>
 </UserControl>
