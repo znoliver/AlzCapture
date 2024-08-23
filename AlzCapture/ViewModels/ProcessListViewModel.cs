@@ -5,7 +5,6 @@ using System.Linq;
 using AlzCapture.Models.Messages;
 using Avalonia.Metadata;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
 namespace AlzCapture.ViewModels;
@@ -32,9 +31,11 @@ public partial class ProcessListViewModel : ViewModelBase
 
     public void OpenNetMonitor()
     {
-        WeakReferenceMessenger.Default.Send(new ProcessMonitorMessage(CurrentSelectedProcess!.Id));
+        WeakReferenceMessenger.Default.Send(
+            new ProcessMonitorMessage(new ProcessMonitorModel(CurrentSelectedProcess!.ProcessName,
+                CurrentSelectedProcess!.Id)));
     }
-    
+
     partial void OnSearchTextChanged(string value)
     {
         FilteredItems.Clear();
