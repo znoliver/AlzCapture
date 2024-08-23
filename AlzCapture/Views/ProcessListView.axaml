@@ -17,13 +17,13 @@
     </Design.DataContext>
 
 
-    <Grid RowDefinitions="Auto,*"
-          Margin="20,0,20,20">
+    <Grid RowDefinitions="Auto,*">
 
-        <TextBox Grid.Row="0" 
-                 Margin="80,10"
+        <TextBox Grid.Row="0"
+                 Margin="80,0"
                  VerticalAlignment="Top"
-                 HorizontalAlignment="Stretch" Watermark="输入进程名称进行搜索"
+                 HorizontalAlignment="Stretch"
+                 Watermark="输入进程名称进行搜索"
                  Text="{Binding SearchText}" />
 
         <DataGrid x:Name="ProcessList"
@@ -36,7 +36,8 @@
                   GridLinesVisibility="Horizontal"
                   SelectedItem="{Binding CurrentSelectedProcess}">
             <i:Interaction.Behaviors>
-                <ia:EventTriggerBehavior EventName="DoubleTapped" SourceObject="ProcessList">
+                <ia:EventTriggerBehavior EventName="DoubleTapped"
+                                         SourceObject="ProcessList">
                     <ia:InvokeCommandAction Command="{Binding OpenNetMonitor}" />
                 </ia:EventTriggerBehavior>
             </i:Interaction.Behaviors>

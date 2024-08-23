@@ -3,9 +3,4 @@ using CommunityToolkit.Mvvm.Messaging.Messages;
 
 namespace AlzCapture.Models.Messages;
 
-public class ProcessMonitorMessage : ValueChangedMessage<int>
-{
-    public ProcessMonitorMessage(int value) : base(value)
-    {
-    }
-}
+public class ProcessMonitorMessage(ProcessMonitorModel value) : ValueChangedMessage<ProcessMonitorModel>(value);

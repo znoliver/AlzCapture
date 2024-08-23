@@ -7,6 +7,7 @@ using AlzCapture.Businesses.Interfaces;
 using AlzCapture.Extensions;
 using AlzCapture.Models;
 using AlzCapture.Models.Http;
+using AlzCapture.Models.Messages;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using PacketDotNet;
@@ -14,36 +15,25 @@ using SharpPcap;
 
 namespace AlzCapture.ViewModels;
 
-public partial class ProcessMonitorViewModel : ViewModelBase
+public partial class ProcessMonitorViewModel(ProcessMonitorModel monitorProcess) : ViewModelBase
 {
-    private readonly int _monitorProcessId;
-
-    private readonly IProcessManager _processManager;
+    private readonly IProcessManager _processManager = ProcessManagerFactory.Create();
 
     private readonly List<ILiveDevice> _liveDevices = new();
 
-    private readonly Dictionary<Tuple<string, ushort, string, ushort, uint, string>, int> _httpPacketKeyDictionary;
+    private readonly Dictionary<Tuple<string, ushort, string, ushort, uint, string>, int> _httpPacketKeyDictionary =
+        new();
 
-    public ObservableCollection<HttpCommunicationPacket> HttpCommunicationPackets { get; set; }
+    public ObservableCollection<HttpCommunicationPacket> HttpCommunicationPackets { get; set; } = new();
 
-    [ObservableProperty] private HttpCommunicationPacket _selectedPacket;
+    public ProcessMonitorModel MonitorProcess => monitorProcess;
 
-    public ProcessMonitorViewModel(int monitorProcessId)
-    {
-        _monitorProcessId = monitorProcessId;
+    [ObservableProperty] private HttpCommunicationPacket? _selectedPacket;
 
-        _processManager = ProcessManagerFactory.Create();
-
-        _httpPacketKeyDictionary = new Dictionary<Tuple<string, ushort, string, ushort, uint, string>, int>();
-
-        HttpCommunicationPackets = new ObservableCollection<HttpCommunicationPacket>();
-    }
+    [ObservableProperty] private bool _isCapturing;
 
     public void StartCapture()
     {
-        var ver = Pcap.SharpPcapVersion;
-        Console.WriteLine("SharpPcap {0}", ver);
-
         var devices = CaptureDeviceList.Instance;
 
         // If no devices were found print an error
@@ -85,6 +75,21 @@ public partial class ProcessMonitorViewModel : ViewModelBase
                 Console.WriteLine($"监听失败：{device.Name},{e.Message}");
             }
         }
+
+        if (_liveDevices.Count > 0)
+        {
+            this.IsCapturing = true;
+        }
+    }
+
+    public void PauseCapture()
+    {
+        foreach (var device in _liveDevices)
+        {
+            device.StopCapture();
+        }
+
+        this.IsCapturing = false;
     }
 
     public void StopCapture()
@@ -95,6 +100,9 @@ public partial class ProcessMonitorViewModel : ViewModelBase
             device.Close();
             device.Dispose();
         }
+
+        this.IsCapturing = false;
+        this.HttpCommunicationPackets.Clear();
     }
 
     private void DeviceOnOnPacketArrival(object sender, PacketCapture e)
@@ -110,10 +118,10 @@ public partial class ProcessMonitorViewModel : ViewModelBase
 
         var payloadData = Encoding.ASCII.GetString(tcpPacket.PayloadData);
         if (payloadData.Length <= 0) return;
-        
+
         if (tcpPacket.IsHttpRequest())
         {
-            var isProcessRequest = _processManager.IsProcessRequestAsync(_monitorProcessId,
+            var isProcessRequest = _processManager.IsProcessRequestAsync(MonitorProcess.ProcessId,
                 ipPacket.SourceAddress.ToString(), tcpPacket.SourcePort.ToString()).Result;
 
             if (!isProcessRequest)

@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:fa="https://github.com/projektanker/icons.avalonia"
              xmlns:vm="using:AlzCapture.ViewModels"
              xmlns:converters="using:AlzCapture.Converters"
              xmlns:controls="using:AlzCapture.Controls"
@@ -14,36 +15,40 @@
         <converters:EnumToIntConverter x:Key="EnumToIntConverter" />
     </UserControl.Resources>
 
-    <SplitView PanePlacement="Right"
-               DisplayMode="Inline"
-               OpenPaneLength="500"
-               IsPaneOpen="True">
-        <!-- IsPaneOpen="{Binding SelectedPacket,Converter={x:Static ObjectConverters.IsNotNull}, Mode=OneWay}"> -->
-        <SplitView.Pane>
-            <controls:HttpPacketContentControl DataContext="{Binding SelectedPacket}" />
-        </SplitView.Pane>
+    <Grid RowDefinitions="Auto,*">
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0"
+                    Margin="80,0"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <TextBox IsReadOnly="True" />
+            <Button fa:Attached.Icon="fa-solid fa-play"
+                    IsVisible="{Binding !IsCapturing}" />
+            <Button fa:Attached.Icon="fa-solid fa-pause"
+                    IsVisible="{Binding IsCapturing}" />
 
-            <StackPanel Grid.Row="0"
-                        Orientation="Horizontal">
-                <Button Content="开始监控"
-                        Command="{Binding StartCapture}" />
-                <Button Content="停止监控"
-                        Command="{Binding StopCapture}" />
-            </StackPanel>
+            <Button fa:Attached.Icon="fa-solid fa-stop"/>
+        </StackPanel>
 
-            <DataGrid Grid.Row="1"
-                      IsReadOnly="True"
+        <SplitView Grid.Row="1"
+                   Margin="0,20,0,0"
+                   PanePlacement="Right"
+                   DisplayMode="Inline"
+                   OpenPaneLength="500"
+                   IsPaneOpen="{Binding SelectedPacket,Converter={x:Static ObjectConverters.IsNotNull}, Mode=OneWay}">
+            <SplitView.Pane>
+                <controls:HttpPacketContentControl DataContext="{Binding SelectedPacket}" />
+            </SplitView.Pane>
+
+            <DataGrid IsReadOnly="True"
                       SelectionMode="Single"
                       CanUserReorderColumns="False"
                       CanUserResizeColumns="False"
                       CanUserSortColumns="False"
                       HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      BorderThickness="2"
+                      BorderBrush="LightGray"
                       ItemsSource="{Binding HttpCommunicationPackets}"
                       SelectedItem="{Binding SelectedPacket}">
                 <DataGrid.Columns>
@@ -59,7 +64,8 @@
                                         Binding="{Binding ResponseTime}" />
                 </DataGrid.Columns>
             </DataGrid>
-        </Grid>
-    </SplitView>
+
+        </SplitView>
+    </Grid>
 
 </UserControl>
