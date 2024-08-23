@@ -24,7 +24,6 @@
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
 
-        <ContentControl Margin="20"
-                        Content="{Binding CurrentDataModel}" />
+        <ContentControl Content="{Binding CurrentContentDataModel}" />
     </Panel>
 </Window>
