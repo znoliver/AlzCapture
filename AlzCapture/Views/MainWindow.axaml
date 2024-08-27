@@ -13,7 +13,11 @@
         TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
         ExtendClientAreaToDecorationsHint="True">
-
+    <Window.Styles>
+        <Style Selector="Button#PART_FullScreenButton">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+    </Window.Styles>
     <Panel>
         <ExperimentalAcrylicBorder IsHitTestVisible="True">
             <ExperimentalAcrylicBorder.Material>
