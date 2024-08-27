@@ -19,12 +19,14 @@
             <ListBox ItemsSource="{Binding RequestPacket.Headers}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
+                        <DockPanel>
                             <SelectableTextBlock VerticalAlignment="Center"
+                                                 DockPanel.Dock="Left"
                                                  Text="{Binding Key,StringFormat='{}{0}:'}" />
                             <SelectableTextBlock VerticalAlignment="Center"
+                                                 TextWrapping="Wrap"
                                                  Text="{Binding Value}" />
-                        </StackPanel>
+                        </DockPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
@@ -36,12 +38,14 @@
             <ListBox ItemsSource="{Binding ResponsePacket.Headers}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
+                        <DockPanel>
                             <SelectableTextBlock VerticalAlignment="Center"
+                                                 DockPanel.Dock="Left"
                                                  Text="{Binding Key,StringFormat='{}{0}:'}" />
                             <SelectableTextBlock VerticalAlignment="Center"
+                                                 TextWrapping="Wrap"
                                                  Text="{Binding Value}" />
-                        </StackPanel>
+                        </DockPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

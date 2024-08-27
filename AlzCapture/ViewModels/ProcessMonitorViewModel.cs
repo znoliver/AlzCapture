@@ -28,9 +28,12 @@ public partial class ProcessMonitorViewModel(ProcessMonitorModel monitorProcess)
 
     public ProcessMonitorModel MonitorProcess => monitorProcess;
 
+    public string MonitorProcessInfo => $"{MonitorProcess.ProcessName} ({MonitorProcess.ProcessId})";
+
     [ObservableProperty] private HttpCommunicationPacket? _selectedPacket;
 
     [ObservableProperty] private bool _isCapturing;
+
 
     public void StartCapture()
     {
@@ -102,6 +105,10 @@ public partial class ProcessMonitorViewModel(ProcessMonitorModel monitorProcess)
         }
 
         this.IsCapturing = false;
+    }
+
+    public void ClearMessage()
+    {
         this.HttpCommunicationPackets.Clear();
     }
 
