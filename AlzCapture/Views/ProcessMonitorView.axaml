@@ -72,7 +72,7 @@
                     <DataGridTextColumn Header="请求地址"
                                         Binding="{Binding RequestRouter}" />
                     <DataGridTextColumn Header="响应状态码"
-                                        Binding="{Binding HttpStatusCode,Converter={StaticResource EnumToIntConverter}}" />
+                                        Binding="{Binding HttpStatusCode,Converter={StaticResource EnumToIntConverter},Mode=OneWay}" />
                     <DataGridTextColumn Header="响应描述"
                                         Binding="{Binding ResponseDescription}" />
                     <DataGridTextColumn Header="响应时间"
