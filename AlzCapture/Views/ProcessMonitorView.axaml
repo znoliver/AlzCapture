@@ -21,13 +21,28 @@
                     Margin="80,0"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center">
-            <TextBox IsReadOnly="True" />
+            <TextBox IsReadOnly="True"
+                     Margin="0,0,20,0"
+                     Text="{Binding MonitorProcessInfo}"
+                     IsHitTestVisible="False" />
             <Button fa:Attached.Icon="fa-solid fa-play"
-                    IsVisible="{Binding !IsCapturing}" />
+                    IsVisible="{Binding !IsCapturing}"
+                    Command="{Binding StartCapture}" />
             <Button fa:Attached.Icon="fa-solid fa-pause"
-                    IsVisible="{Binding IsCapturing}" />
+                    IsVisible="{Binding IsCapturing}"
+                    Command="{Binding PauseCapture}" />
 
-            <Button fa:Attached.Icon="fa-solid fa-stop"/>
+            <Button fa:Attached.Icon="fa-solid fa-stop"
+                    Command="{Binding StopCapture}"
+                    IsEnabled="{Binding IsCapturing}" />
+            <Button fa:Attached.Icon="fa-solid fa-ban"
+                    Command="{Binding ClearMessage}" 
+                    IsEnabled="{Binding HttpCommunicationPackets.Count}">
+                <ToolTip.Tip>
+                    <TextBlock Text="清空信息"/>
+                </ToolTip.Tip>
+            </Button>
+
         </StackPanel>
 
         <SplitView Grid.Row="1"
