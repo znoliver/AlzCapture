@@ -34,7 +34,7 @@ public class HttpPacket
     public void SetPayload(byte[] payloadData)
     {
         this.PayloadData = payloadData;
-        var data = Encoding.ASCII.GetString(payloadData);
+        var data = Encoding.UTF8.GetString(payloadData);
 
         var lines = data.Split(Environment.NewLine).ToList();
         var index = lines.FindIndex(string.IsNullOrWhiteSpace);
