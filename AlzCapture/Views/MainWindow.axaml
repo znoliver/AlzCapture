@@ -8,11 +8,12 @@
         d:DesignHeight="450"
         x:Class="AlzCapture.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/alz-logo.png"
+        Icon="/Assets/alz-logo.ico"
         Title="AlzCapture"
         TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
-        ExtendClientAreaToDecorationsHint="True">
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="50">
     <Window.Styles>
         <Style Selector="Button#PART_FullScreenButton">
             <Setter Property="IsVisible" Value="False" />

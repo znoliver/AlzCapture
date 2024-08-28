@@ -5,6 +5,7 @@
              xmlns:i="clr-namespace:Avalonia.Xaml.Interactivity;assembly=Avalonia.Xaml.Interactivity"
              xmlns:ia="clr-namespace:Avalonia.Xaml.Interactions.Core;assembly=Avalonia.Xaml.Interactions"
              xmlns:vm="using:AlzCapture.ViewModels"
+             xmlns:converter="using:AlzCapture.Converters"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -16,10 +17,14 @@
         <vm:ProcessListViewModel />
     </Design.DataContext>
 
+    <UserControl.Resources>
+        <converter:ProcessInfoConverter x:Key="ProcessInfoConverter" />
+    </UserControl.Resources>
 
     <Grid RowDefinitions="Auto,*">
 
         <TextBox Grid.Row="0"
+                 MaxWidth="500"
                  Margin="80,0"
                  VerticalAlignment="Top"
                  HorizontalAlignment="Stretch"
@@ -47,7 +52,7 @@
                 <DataGridTextColumn Header="进程名称"
                                     Binding="{Binding ProcessName}" />
                 <DataGridTextColumn Header="进程信息"
-                                    Binding="{Binding  MainModule.FileName}" />
+                                    Binding="{Binding  Converter={StaticResource ProcessInfoConverter} ,Mode=OneWay}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
