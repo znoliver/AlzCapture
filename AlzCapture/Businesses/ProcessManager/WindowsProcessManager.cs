@@ -9,7 +9,8 @@ namespace AlzCapture.Businesses.ProcessManager;
 public class WindowsProcessManager : IProcessManager
 {
     [DllImport("iphlpapi.dll", SetLastError = true)]
-    private static extern uint GetExtendedTcpTable(IntPtr pTcpTable, ref int dwOutBufLen, bool sort, int ipVersion, TcpTableClass tblClass, int reserved);
+    private static extern uint GetExtendedTcpTable(IntPtr pTcpTable, ref int dwOutBufLen, bool sort, int ipVersion,
+        TcpTableClass tblClass, int reserved);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct MIB_TCPROW_OWNER_PID
@@ -34,7 +35,7 @@ public class WindowsProcessManager : IProcessManager
         TCP_TABLE_OWNER_MODULE_CONNECTIONS,
         TCP_TABLE_OWNER_MODULE_ALL
     }
-    
+
     public Task<bool> IsProcessRequestAsync(int processId, string requestIp, string requestPort)
     {
         int bufferSize = 0;
@@ -42,10 +43,12 @@ public class WindowsProcessManager : IProcessManager
 
         try
         {
-            uint result = GetExtendedTcpTable(IntPtr.Zero, ref bufferSize, true, 2 /*AF_INET*/, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
+            uint result = GetExtendedTcpTable(IntPtr.Zero, ref bufferSize, true, 2 /*AF_INET*/,
+                TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
             tcpTable = Marshal.AllocHGlobal(bufferSize);
-            result = GetExtendedTcpTable(tcpTable, ref bufferSize, true, 2 /*AF_INET*/, TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
+            result = GetExtendedTcpTable(tcpTable, ref bufferSize, true, 2 /*AF_INET*/,
+                TcpTableClass.TCP_TABLE_OWNER_PID_ALL, 0);
 
             if (result == 0)
             {
@@ -59,13 +62,10 @@ public class WindowsProcessManager : IProcessManager
 
                     IPAddress address = new IPAddress(tcpRow.localAddr);
                     int localPort = (ushort)IPAddress.NetworkToHostOrder((short)tcpRow.localPort);
-                    int remotePort =(ushort) IPAddress.NetworkToHostOrder((short)tcpRow.remotePort);
 
-                    // Console.WriteLine($"进程{tcpRow.owningPid}在地址{address.ToString()}以及端口{localPort}上发起请求");
-                    // Console.WriteLine($"监控进程{processId}在地址{requestIp}以及端口{requestPort}上发起的请求");
-                    
                     // 比较 IP 地址、端口和进程 ID
-                    if (address.ToString() == requestIp && localPort.ToString() == requestPort && tcpRow.owningPid == processId)
+                    if (address.ToString() == requestIp && localPort.ToString() == requestPort &&
+                        tcpRow.owningPid == processId)
                     {
                         return Task.FromResult(true);
                     }

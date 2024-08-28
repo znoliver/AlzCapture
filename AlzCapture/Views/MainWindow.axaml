@@ -8,7 +8,7 @@
         d:DesignHeight="450"
         x:Class="AlzCapture.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/alz-logo.png"
         Title="AlzCapture"
         TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
