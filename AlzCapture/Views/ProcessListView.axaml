@@ -46,6 +46,8 @@
                                     Binding="{Binding Id}" />
                 <DataGridTextColumn Header="进程名称"
                                     Binding="{Binding ProcessName}" />
+                <DataGridTextColumn Header="进程信息"
+                                    Binding="{Binding  MainModule.FileName}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

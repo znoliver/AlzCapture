@@ -36,10 +36,10 @@
                     Command="{Binding StopCapture}"
                     IsEnabled="{Binding IsCapturing}" />
             <Button fa:Attached.Icon="fa-solid fa-ban"
-                    Command="{Binding ClearMessage}" 
+                    Command="{Binding ClearMessage}"
                     IsEnabled="{Binding HttpCommunicationPackets.Count}">
                 <ToolTip.Tip>
-                    <TextBlock Text="清空信息"/>
+                    <TextBlock Text="清空信息" />
                 </ToolTip.Tip>
             </Button>
 
@@ -50,6 +50,7 @@
                    PanePlacement="Right"
                    DisplayMode="Inline"
                    OpenPaneLength="500"
+                   PaneBackground="Transparent"
                    IsPaneOpen="{Binding SelectedPacket,Converter={x:Static ObjectConverters.IsNotNull}, Mode=OneWay}">
             <SplitView.Pane>
                 <controls:HttpPacketContentControl DataContext="{Binding SelectedPacket}" />
