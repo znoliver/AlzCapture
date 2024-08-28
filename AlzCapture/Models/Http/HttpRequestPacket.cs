@@ -5,7 +5,7 @@ namespace AlzCapture.Models.Http;
 
 public class HttpRequestPacket : HttpPacket
 {
-    public HttpMethod RequestMethod { get; private set; }
+    public HttpMethod RequestMethod { get; private set; } = null!;
 
     public string RequestRouter { get; private set; } = string.Empty;
 

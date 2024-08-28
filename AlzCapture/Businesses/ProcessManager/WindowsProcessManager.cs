@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ public class WindowsProcessManager : IProcessManager
         TCP_TABLE_OWNER_MODULE_CONNECTIONS,
         TCP_TABLE_OWNER_MODULE_ALL
     }
-
+    
     public Task<bool> IsProcessRequestAsync(int processId, string requestIp, string requestPort)
     {
         int bufferSize = 0;

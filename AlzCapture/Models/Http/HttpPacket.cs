@@ -26,7 +26,7 @@ public class HttpPacket
 
     public string? Body { get; private set; }
 
-    public PosixTimeval CaptureTime { get; set; }
+    public PosixTimeval CaptureTime { get; set; } = null!;
 
     /// <summary>
     /// Method to set the payload of the http packet and parse the data to the http packet properties
